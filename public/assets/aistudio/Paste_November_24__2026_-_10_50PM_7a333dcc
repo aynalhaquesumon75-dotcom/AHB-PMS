@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#10264c">
+<title>AHB PMS - Production Management System</title>
+
+<style>
+:root{
+  --navy:#10264c;
+  --navy2:#193b70;
+  --blue:#1769e0;
+  --blue2:#3689ff;
+  --bg:#f1f5fb;
+  --white:#ffffff;
+  --text:#182c4c;
+  --muted:#73839c;
+  --border:#e4ebf5;
+  --green:#10a56b;
+  --orange:#f28b20;
+  --purple:#8052d9;
+  --red:#e14c56;
+  --shadow:0 6px 24px rgba(27,57,105,.08);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,"Noto Sans Bengali",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;display:flex}
+.sidebar{
+  width:245px;flex-shrink:0;background:linear-gradient(180deg,#10264c,#0b1d39);
+  color:white;position:fixed;top:0;bottom:0;left:0;z-index:50;
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+.brand{padding:23px 19px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #ffffff15}
+.brand-icon{
+  width:45px;height:45px;border-radius:14px;background:linear-gradient(135deg,#388cff,#0754c7);
+  display:grid;place-items:center;font-size:23px;box-shadow:0 5px 15px #006bff44
+}
+.brand-name{font-size:20px;font-weight:800;letter-spacing:.4px}
+.brand-sub{font-size:10px;color:#a9c5e9;margin-top:3px}
+.nav{padding:16px 10px;display:flex;flex-direction:column;gap:5px}
+.nav button{
+  border:0;background:transparent;color:#c5d4e9;text-align:left;padding:13px 14px;
+  border-radius:11px;font-size:14px;display:flex;align-items:center;gap:12px;transition:.2s
+}
+.nav button:hover{background:#ffffff12;color:white}
+.nav button.active{background:linear-gradient(90deg,#1263df,#2584ff);color:white;box-shadow:0 5px 14px #1674ff30}
+.nav .ico{width:23px;text-align:center;font-size:18px}
+.sidebar-bottom{margin-top:auto;padding:17px}
+.sidebar-card{
+  border-radius:15px;background:linear-gradient(135deg,#194b88,#102c54);
+  padding:16px;border:1px solid #ffffff18
+}
+.sidebar-card strong{display:block;font-size:13px;margin-bottom:6px}
+.sidebar-card small{font-size:11px;color:#b9d0ee;line-height:1.6}
+.sidebar-footer{font-size:10px;color:#829cbd;text-align:center;padding:12px}
+.main{margin-left:245px;width:calc(100% - 245px);min-width:0}
+.topbar{
+  height:72px;background:white;border-bottom:1px solid var(--border);padding:0 25px;
+  display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:30
+}
+.top-left{display:flex;align-items:center;gap:12px}
+.menu-btn{display:none;border:0;background:#eef4ff;color:var(--navy);padding:9px 11px;border-radius:10px;font-size:18px}
+.top-title{font-size:14px;font-weight:700}
+.top-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.top-right{display:flex;align-items:center;gap:12px}
+.date-pill{background:#f1f5ff;border:1px solid #e4ebfb;padding:9px 12px;border-radius:11px;font-size:12px;color:#36557d}
+.admin-pill{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:700}
+.avatar{width:35px;height:35px;border-radius:50%;display:grid;place-items:center;background:#e5efff;color:#1764d5;font-size:17px}
+.content{padding:22px 24px 35px;max-width:1600px;margin:auto}
+.page{display:none}
+.page.active{display:block}
+.welcome{
+  min-height:155px;border-radius:19px;overflow:hidden;padding:27px 30px;color:white;
+  background:linear-gradient(110deg,#113c78,#136dd5 60%,#3c94ef);
+  position:relative;margin-bottom:21px
+}
+.welcome:after{
+  content:"🏭";position:absolute;right:30px;bottom:-15px;font-size:120px;opacity:.15
+}
+.welcome h1{margin:0;font-size:25px}
+.welcome p{margin:10px 0 0;color:#d6e8ff;font-size:13px}
+.welcome .welcome-tag{margin-top:17px;font-size:11px;background:#ffffff20;padding:7px 12px;border-radius:20px;display:inline-block}
+.section-title{font-size:17px;font-weight:800;margin:0 0 15px}
+.section-sub{font-size:12px;color:var(--muted);margin:-8px 0 16px}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(130px,1fr));gap:13px;margin-bottom:21px}
+.kpi{
+  padding:17px 16px;border-radius:15px;background:white;box-shadow:var(--shadow);
+  min-height:105px;position:relative;overflow:hidden;border:1px solid #eef2f8
+}
+.kpi-top{display:flex;align-items:center;justify-content:space-between}
+.kpi-label{font-size:11px;color:#647892;font-weight:700}
+.kpi-icon{width:33px;height:33px;border-radius:10px;display:grid;place-items:center;font-size:17px}
+.kpi-value{font-size:23px;font-weight:800;margin-top:12px;letter-spacing:-.3px}
+.kpi-blue .kpi-icon{background:#e8f1ff;color:#1769db}
+.kpi-green .kpi-icon{background:#e5f8ef;color:#0c9b62}
+.kpi-purple .kpi-icon{background:#f0eaff;color:#8152db}
+.kpi-cyan .kpi-icon{background:#e2f8fc;color:#0796a9}
+.kpi-orange .kpi-icon{background:#fff1e1;color:#e78516}
+.kpi-navy .kpi-icon{background:#e8eef8;color:#173866}
+.grid2{display:grid;grid-template-columns:1.65fr 1fr;gap:17px;margin-bottom:20px}
+.card{background:white;border-radius:16px;border:1px solid #e8eef7;box-shadow:var(--shadow);padding:18px}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}
+.card-head h3{font-size:15px;margin:0}
+.card-head select{max-width:150px}
+.chart{height:225px;display:flex;align-items:flex-end;gap:7px;padding:12px 4px 24px;border-bottom:1px solid #e9eef6;position:relative}
+.chart-grid{
+  position:absolute;left:0;right:0;height:1px;background:#eef2f8
+}
+.chart-bar{
+  flex:1;min-width:4px;max-width:30px;background:linear-gradient(180deg,#54a3ff,#1766dc);
+  border-radius:5px 5px 0 0;position:relative;z-index:1;transition:.2s
+}
+.chart-bar:hover{filter:brightness(1.12)}
+.chart-bar span{
+  position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);
+  color:#8291a6;font-size:9px;white-space:nowrap
+}
+.chart-legend{display:flex;justify-content:center;gap:17px;margin-top:14px;font-size:11px;color:#62758f}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:#2780f1}
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.quick-btn{
+  border:0;border-radius:11px;padding:12px 9px;color:white;font-size:12px;font-weight:700;
+  background:linear-gradient(135deg,#1769df,#388bff);text-align:center
+}
+.quick-btn.green{background:linear-gradient(135deg,#0c9c62,#22bd7d)}
+.quick-btn.purple{background:linear-gradient(135deg,#7042cf,#9b69ee)}
+.quick-btn.orange{background:linear-gradient(135deg,#e77912,#ff9c39)}
+.quick-btn .qicon{display:block;font-size:20px;margin-bottom:6px}
+.table-card{margin-bottom:18px}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:550px}
+th,td{padding:11px 10px;text-align:left;border-bottom:1px solid #edf1f7;font-size:12px}
+th{background:#f5f8fd;color:#526783;font-size:11px;font-weight:800;white-space:nowrap}
+td{color:#273b58}
+tbody tr:hover{background:#f9fbff}
+.tag{display:inline-block;padding:4px 8px;border-radius:7px;background:#edf4ff;color:#2066c7;font-size:10px;font-weight:700}
+.tag-green{background:#e8f8ef;color:#10965f}
+.tag-orange{background:#fff2e4;color:#d77c18}
+.tag-red{background:#ffecee;color:#d9434f}
+.actions{display:flex;gap:5px}
+.icon-btn{border:0;padding:6px 8px;border-radius:7px;background:#edf4ff;color:#236bd2;font-size:12px}
+.icon-btn.del{background:#fff0f1;color:#db4c58}
+.form-card{max-width:100%;margin-bottom:18px}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+.field label{font-size:12px;font-weight:700;color:#526783}
+input,select,textarea{
+  width:100%;padding:11px 12px;border:1px solid #dce5f1;border-radius:10px;
+  background:white;color:#1c3558;font-size:13px;outline:none
+}
+input:focus,select:focus,textarea:focus{border-color:#4289ed;box-shadow:0 0 0 3px #3985f011}
+input[readonly]{background:#f5f8fc;color:#506783}
+.form-buttons{display:flex;gap:9px;margin-top:17px;flex-wrap:wrap}
+.btn{border:0;border-radius:10px;padding:11px 17px;font-size:12px;font-weight:800}
+.btn-primary{background:linear-gradient(135deg,#1766d7,#3889ff);color:white}
+.btn-secondary{background:#edf2f8;color:#445c7b}
+.btn-danger{background:#fff0f1;color:#d83f4e}
+.btn-success{background:#e9f8f0;color:#0d995e}
+.btn-dark{background:#17365f;color:white}
+.filter-row{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:13px}
+.filter-row input,.filter-row select{max-width:230px}
+.empty{text-align:center;padding:30px;color:#8796ab;font-size:13px}
+.report-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.report-mini{background:#f5f8fe;padding:15px;border-radius:12px}
+.report-mini small{color:#71829b;font-size:11px}
+.report-mini strong{display:block;font-size:20px;margin-top:7px}
+.notice{padding:12px 14px;background:#edf5ff;border:1px solid #deebff;border-radius:10px;color:#42618a;font-size:12px;margin-bottom:15px;line-height:1.7}
+.footer{text-align:center;color:#8a9bb0;font-size:10px;padding:18px 5px}
+.overlay{display:none;position:fixed;inset:0;background:#06162b88;z-index:40}
+.overlay.show{display:block}
+@media(max-width:1250px){
+ .kpis{grid-template-columns:repeat(3,1fr)}
+ .grid2{grid-template-columns:1fr}
+}
+@media(max-width:800px){
+ .sidebar{transform:translateX(-100%);transition:.25s}
+ .sidebar.open{transform:translateX(0)}
+ .main{margin-left:0;width:100%}
+ .menu-btn{display:block}
+ .topbar{height:62px;padding:0 14px}
+ .top-right{gap:7px}
+ .date-pill{display:none}
+ .content{padding:15px}
+ .welcome{min-height:140px;padding:23px}
+ .welcome h1{font-size:21px}
+ .welcome p{font-size:12px;max-width:260px}
+ .welcome:after{right:5px;font-size:90px}
+ .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .kpi{min-height:90px;padding:13px}
+ .kpi-value{font-size:21px}
+ .grid2{grid-template-columns:1fr}
+ .form-grid{grid-template-columns:1fr}
+ .field.full{grid-column:auto}
+ .report-cards{grid-template-columns:1fr 1fr}
+}
+@media(max-width:400px){
+ .kpi-label{font-size:10px}
+ .kpi-value{font-size:19px}
+ .card{padding:13px}
+ .quick-btn{font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">🏭</div>
+      <div>
+        <div class="brand-name">AHB PMS</div>
+        <div class="brand-sub">Production Management System</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button class="active" onclick="page('dashboard',this)"><span class="ico">▦</span> Dashboard</button>
+      <button onclick="page('buyer',this)"><span class="ico">♙</span> Add Buyer</button>
+      <button onclick="page('style',this)"><span class="ico">👕</span> Add Style</button>
+      <button onclick="page('po',this)"><span class="ico">▤</span> Add PO</button>
+      <button onclick="page('production',this)"><span class="ico">⚙</span> Production Entry</button>
+      <button onclick="page('history',this)"><span class="ico">◷</span> History</button>
+      <button onclick="page('reports',this)"><span class="ico">▥</span> Monthly Reports</button>
+      <button onclick="page('backup',this)"><span class="ico">☁</span> Backup & Restore</button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-card">
+        <strong>AHB Production System</strong>
+        <small>Track production, manage orders and monitor your factory performance.</small>
+      </div>
+    </div>
+    <div class="sidebar-footer">AHB PMS · Version 2.0</div>
+  </aside>
+
+  <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="top-left">
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <div>
+          <div class="top-title" id="topTitle">Dashboard</div>
+          <div class="top-sub">Production Management Overview</div>
+        </div>
+      </div>
+      <div class="top-right">
+        <div class="date-pill" id="dateNow"></div>
+        <div class="admin-pill"><div class="avatar">♙</div> Admin</div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <section class="page active" id="dashboard">
+        <div class="welcome">
+          <h1>Welcome to AHB PMS</h1>
+          <p>Smart Production Management for Better Tomorrow</p>
+          <span class="welcome-tag">✦ Manage your production efficiently</span>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi kpi-blue"><div class="kpi-top"><span class="kpi-label">Total Buyers</span><span class="kpi-icon">♙</span></div><div class="kpi-value" id="kBuyer">0</div></div>
+          <div class="kpi kpi-green"><div class="kpi-top"><span class="kpi-label">Total PO</span><span class="kpi-icon">▤</span></div><div class="kpi-value" id="kPO">0</div></div>
+          <div class="kpi kpi-purple"><div class="kpi-top"><span class="kpi-label">Total Order Qty</span><span class="kpi-icon">🛒</span></div><div class="kpi-value" id="kOrder">0</div></div>
+          <div class="kpi kpi-cyan"><div class="kpi-top"><span class="kpi-label">Total Production</span><span class="kpi-icon">⚙</span></div><div class="kpi-value" id="kProduction">0</div></div>
+          <div class="kpi kpi-orange"><div class="kpi-top"><span class="kpi-label">Today Production</span><span class="kpi-icon">▦</span></div><div class="kpi-value" id="kToday">0</div></div>
+          <div class="kpi kpi-navy"><div class="kpi-top"><span class="kpi-label">Balance Qty</span><span class="kpi-icon">✓</span></div><div class="kpi-value" id="kBalance">0</div></div>
+        </div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-head">
+              <h3>📈 Production Overview</h3>
+              <select id="dashMonth" onchange="renderDashboard()"></select>
+            </div>
+            <div class="chart" id="dashChart"></div>
+            <div class="chart-legend"><span><i class="dot"></i>Daily Production</span></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>⚡ Quick Actions</h3></div>
+            <div class="quick-actions">
+              <button class="quick-btn" onclick="go('buyer')"><span class="qicon">♙</span>Add Buyer</button>
+              <button class="quick-btn green" onclick="go('style')"><span class="qicon">👕</span>Add Style</button>
+              <button class="quick-btn purple" onclick="go('po')"><span class="qicon">▤</span>Add PO</button>
+              <button class="quick-btn orange" onclick="go('production')"><span class="qicon">⚙</span>New Production</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card table-card">
+          <div class="card-head"><h3>Recent Production Entries</h3><button class="btn btn-secondary" onclick="go('history')">View All →</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Date</th><th>Buyer</th><th>Style</th><th>PO</th><th>Today Qty</th></tr></thead><tbody id="recentBody"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- BUYERS -->
+      <section class="page" id="buyer">
+        <h2 class="section-title">Buyer Management</h2>
+        <p class="section-sub">Create and manage your buyer list.</p>
+        <div class="card form-card">
+          <div class="card-head"><h3 id="buyerFormTitle">➕ Add New Buyer</h3></div>
+          <div class="form-grid">
+            <div class="field full"><label>Buyer Name</label><input id="bName" placeholder="Enter buyer name"></div>
+          </div>
+          <div class="form-buttons">
+            <button class="btn btn-primary" onclick="saveBuyer()">Save Buyer</button>
+            <button class="btn btn-secondary" onclick="resetBuyer()">Reset</button>
+          </div>
+        </div>
+        <div class="card table-card">
+          <div class="card-head"><h3>Buyer List</h3></div>
+          <div class="table-wrap"><table><thead><tr><th>#</th><th>Buyer</th><th>Styles</th><th>POs</th><th>Actions</th></tr></thead><tbody id="buyerBody"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- STYLES -->
+      <section class="page" id="style">
+        <h2 class="section-title">Style Management</h2>
+        <p class="section-sub">Add styles under a buyer.</p>
+        <div class="card form-card">
+          <div class="card-head"><h3 id="styleFormTitle">➕ Add New Style</h3></div>
+          <div class="form-grid">
+            <div class="field"><label>Buyer</label><select id="sBuyer"></select></div>
+            <div class="field"><label>Style Name</label><input id="sName" placeholder="Enter style name"></div>
+          </div>
+          <div class="form-buttons">
+            <button class="btn btn-primary" onclick="saveStyle()">Save Style</button>
+            <button class="btn btn-secondary" onclick="resetStyle()">Reset</button>
+          </div>
+        </div>
+        <div class="card table-card">
+          <div class="card-head"><h3>Style List</h3></div>
+          <div class="table-wrap"><table><thead><tr><th>#</th><th>Buyer</th><th>Style</th><th>PO Count</th><th>Actions</th></tr></thead><tbody id="styleBody"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- PO -->
+      <section class="page" id="po">
+        <h2 class="section-title">Purchase Order Management</h2>
+        <p class="section-sub">Create a PO and assign buyer, style and order quantity.</p>
+        <div class="card form-card">
+          <div class="card-head"><h3 id="poFormTitle">➕ Add New PO</h3></div>
+          <div class="form-grid">
+            <div class="field"><label>Buyer</label><select id="pBuyer" onchange="poStyleOptions()"></select></div>
+            <div class="field"><label>Style</label><select id="pStyle"></select></div>
+            <div class="field"><label>PO Number</label><input id="pNumber" placeholder="Enter PO number"></div>
+            <div class="field"><label>Order Quantity</label><input id="pOrder" type="number" min="0" placeholder="Enter order quantity"></div>
+          </div>
+          <div class="form-buttons">
+            <button class="btn btn-primary" onclick="savePO()">Save PO</button>
+            <button class="btn btn-secondary" onclick="resetPO()">Reset</button>
+          </div>
+        </div>
+        <div class="card table-card">
+          <div class="card-head"><h3>PO List</h3></div>
+          <div class="filter-row"><input id="poSearch" placeholder="Search buyer, style or PO..." oninput="renderPOs()"></div>
+          <div class="table-wrap"><table><thead><tr><th>Buyer</th><th>Style</th><th>PO Number</th><th>Order Qty</th><th>Production</th><th>Balance</th><th>Actions</th></tr></thead><tbody id="poBody"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- PRODUCTION -->
+      <section class="page" id="production">
+        <h2 class="section-title">Production Entry</h2>
+        <p class="section-sub">Enter cumulative production. Today production will be calculated automatically.</p>
+        <div class="notice">ℹ️ <b>Calculation:</b> Today Production = Total Production − Before Production. Total Production input দিলে Today Production অটোমেটিক হিসাব হবে।</div>
+        <div class="card form-card">
+          <div class="card-head"><h3 id="prodFormTitle">⚙️ New Production Entry</h3></div>
+          <div class="form-grid">
+            <div class="field"><label>Production Date</label><input id="dDate" type="date" onchange="updateBefore()"></div>
+            <div class="field"><label>Buyer</label><select id="dBuyer" onchange="prodStyleOptions()"></select></div>
+            <div class="field"><label>Style</label><select id="dStyle" onchange="prodPOOptions()"></select></div>
+            <div class="field"><label>PO Number</label><select id="dPO" onchange="prodInfo()"></select></div>
+            <div class="field"><label>Before Production</label><input id="beforeQty" readonly value="0"></div>
+            <div class="field"><label>Total Production (Cumulative)</label><input id="totalInput" type="number" min="0" placeholder="Enter total production" oninput="calc()"></div>
+            <div class="field"><label>Today Production (Auto)</label><input id="prodQty" readonly value="0"></div>
+            <div class="field"><label>Remaining Balance</label><input id="prodBalance" readonly value="0"></div>
+          </div>
+          <div class="form-buttons">
+            <button class="btn btn-primary" onclick="saveProd()">Save Production</button>
+            <button class="btn btn-secondary" onclick="resetProd()">Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- HISTORY -->
+      <section class="page" id="history">
+        <h2 class="section-title">Production History</h2>
+        <p class="section-sub">Browse, edit and delete production entries.</p>
+        <div class="card table-card">
+          <div class="filter-row">
+            <input id="histSearch" placeholder="Search Buyer, Style, PO..." oninput="historyRender()">
+            <input id="histDate" type="date" onchange="historyRender()">
+            <button class="btn btn-secondary" onclick="document.getElementById('histDate').value='';historyRender()">Clear Date</button>
+            <button class="btn btn-success" onclick="csvExport()">Export CSV</button>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Date</th><th>Buyer</th><th>Style</th><th>PO</th><th>Today Qty</th><th>Actions</th></tr></thead><tbody id="historyBody"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- REPORTS -->
+      <section class="page" id="reports">
+        <h2 class="section-title">Monthly Production Reports</h2>
+        <p class="section-sub">Analyze PO-wise, buyer-wise and style-wise production.</p>
+        <div class="card table-card">
+          <div class="filter-row">
+            <select id="reportMonth"></select>
+            <select id="reportType">
+              <option value="po">PO-wise Report</option>
+              <option value="buyer">Buyer-wise Report</option>
+              <option value="style">Style-wise Report</option>
+            </select>
+            <button class="btn btn-primary" onclick="reportsRender()">Generate Report</button>
+            <button class="btn btn-success" onclick="reportCSV()">Export CSV</button>
+          </div>
+          <div id="reportSummary" class="report-cards"></div>
+          <div class="table-wrap"><table><thead id="reportHead"></thead><tbody id="reportBody"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- BACKUP -->
+      <section class="page" id="backup">
+        <h2 class="section-title">Backup & Restore</h2>
+        <p class="section-sub">Keep a safe backup of your AHB PMS data.</p>
+        <div class="grid2">
+          <div class="card">
+            <h3>📥 Backup Data</h3>
+            <p class="section-sub">Download buyers, styles, POs and production records as JSON.</p>
+            <button class="btn btn-primary" onclick="backup()">Download Backup</button>
+          </div>
+          <div class="card">
+            <h3>📤 Restore Data</h3>
+            <p class="section-sub">Import a previous JSON backup file. Existing data will be replaced.</p>
+            <input type="file" id="restoreFile" accept=".json,application/json">
+            <button class="btn btn-success" style="margin-top:12px" onclick="restore()">Restore Backup</button>
+          </div>
+        </div>
+        <div class="card" style="margin-top:18px">
+          <h3>⚠️ Clear All Data</h3>
+          <p class="section-sub">Permanently clear buyers, styles, POs and production records from this device.</p>
+          <button class="btn btn-danger" onclick="clearData()">Clear All Data</button>
+        </div>
+      </section>
+
+      <div class="footer">AHB PMS · Production Management System · Designed for Your Business</div>
+    </div>
+  </main>
+</div>
+
+<script>
+/* ========== STORAGE ========== */
+const KEY={
+ buyers:'pms_buyers',
+ pos:'pms_pos',
+ productions:'pms_productions',
+ styles:'pms_styles',
+ poNumbers:'pms_po_numbers',
+ lastSaved:'pms_last_saved'
+};
+let buyers=[],pos=[],productions=[],styles=[],poNumbers=[];
+let editBuyer=null,editStyle=null,editPO=null,editProd=null;
+
+/* ========== HELPERS ========== */
+const $=id=>document.getElementById(id);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const num=n=>Number(n||0);
+const fmt=n=>num(n).toLocaleString('en-US');
+function localDate(){
+ const d=new Date();
+ d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
+ return d.toISOString().slice(0,10);
+}
+function escapeHTML(s){
+ return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function saveData(){
+ localStorage.setItem(KEY.buyers,JSON.stringify(buyers));
+ localStorage.setItem(KEY.pos,JSON.stringify(pos));
+ localStorage.setItem(KEY.productions,JSON.stringify(productions));
+ localStorage.setItem(KEY.styles,JSON.stringify(styles));
+ localStorage.setItem(KEY.poNumbers,JSON.stringify(poNumbers));
+ localStorage.setItem(KEY.lastSaved,localDate());
+}
+function read(key,defaultVal=[]){
+ try{const x=JSON.parse(localStorage.getItem(key));return x??defaultVal}catch(e){return defaultVal}
+}
+function load(){
+ buyers=read(KEY.buyers);
+ pos=read(KEY.pos);
+ productions=read(KEY.productions);
+ styles=read(KEY.styles);
+ poNumbers=read(KEY.poNumbers);
+ // Compatibility: old PO style names -> style master records
+ pos.forEach(p=>{
+   if(!p.styleId && p.style){
+     let s=styles.find(x=>x.name===p.style && (x.buyerId===p.buyerId||x.buyer===p.buyer));
+     if(!s){
+       s={id:uid(),name:p.style,buyerId:p.buyerId||'',buyer:p.buyer||''};
+       styles.push(s);
+     }
+     p.styleId=s.id;
+   }
+ });
+ renderAll();
+}
+
+/* ========== ENTITY HELPERS ========== */
+function buyerName(id){
+ const b=buyers.find(x=>x.id===id||x.name===id);
+ return b?(b.name||b.buyer||''):(id||'—');
+}
+function styleName(id,po){
+ const s=styles.find(x=>x.id===id);
+ if(s)return s.name||s.style||'';
+ return po?.style||'—';
+}
+function getBuyerForPO(p){
+ return p.buyerId||p.buyer||'';
+}
+function getStyleForPO(p){
+ return p.styleId||p.style||'';
+}
+function getPOBuyer(p){
+ const b=getBuyerForPO(p);
+ return buyerName(b);
+}
+function getPOStyle(p){
+ const s=getStyleForPO(p);
+ return styleName(s,p);
+}
+function poLabel(p){return p.po||p.number||p.poNumber||''}
+function orderQty(p){return num(p.order||p.orderQty||p.qty)}
+function findPO(id){return pos.find(p=>p.id===id)}
+function productionsForPO(id,excludeId=null){
+ return productions.filter(x=>x.poId===id&&x.id!==excludeId);
+}
+function poStats(id){
+ const list=productionsForPO(id);
+ const total=list.reduce((a,b)=>a+num(b.qty),0);
+ const today=list.filter(x=>x.date===localDate()).reduce((a,b)=>a+num(b.qty),0);
+ const po=findPO(id);
+ return {total,today,balance:Math.max(0,orderQty(po)-total)};
+}
+function calculated(id,date,excludeId=null){
+ return productionsForPO(id,excludeId).filter(x=>x.date<date)
+  .reduce((a,b)=>a+num(b.qty),0);
+}
+function sumPOProduction(id,excludeId=null){
+ return productionsForPO(id,excludeId).reduce((a,b)=>a+num(b.qty),0);
+}
+
+/* ========== NAVIGATION ========== */
+const pageTitles={
+ dashboard:'Dashboard',buyer:'Buyer Management',style:'Style Management',
+ po:'PO Management',production:'Production Entry',history:'Production History',
+ reports:'Monthly Reports',backup:'Backup & Restore'
+};
+function page(id,btn){
+ document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+ $(id).classList.add('active');
+ document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+ if(btn)btn.classList.add('active');
+ else{
+  const b=[...document.querySelectorAll('.nav button')].find(x=>x.getAttribute('onclick')?.includes("'"+id+"'"));
+  if(b)b.classList.add('active');
+ }
+ $('topTitle').textContent=pageTitles[id]||id;
+ if(id==='production')fillProductionSelectors();
+ if(id==='po')fillPOSelectors();
+ if(id==='reports')reportsRender();
+ renderAll();
+ closeMenu();
+}
+function go(id){page(id)}
+function toggleMenu(){
+ $('sidebar').classList.toggle('open');
+ $('overlay').classList.toggle('show');
+}
+function closeMenu(){
+ $('sidebar').classList.remove('open');
+ $('overlay').classList.remove('show');
+}
+
+/* ========== SELECTS ========== */
+function setOptions(el,items,placeholder='Select'){
+ el.innerHTML='<option value="">'+placeholder+'</option>'+items.map(x=>`<option value="${escapeHTML(x.id)}">${escapeHTML(x.name)}</option>`).join('');
+}
+function fill(){
+ setOptions($('sBuyer'),buyers.map(b=>({id:b.id,name:b.name})), 'Select Buyer');
+ setOptions($('pBuyer'),buyers.map(b=>({id:b.id,name:b.name})), 'Select Buyer');
+ setOptions($('dBuyer'),buyers.map(b=>({id:b.id,name:b.name})), 'Select Buyer');
+ poStyleOptions();
+ prodStyleOptions();
+}
+function fillPOSelectors(){
+ setOptions($('pBuyer'),buyers.map(b=>({id:b.id,name:b.name})), 'Select Buyer');
+ poStyleOptions();
+}
+function poStyleOptions(){
+ const bid=$('pBuyer').value;
+ const list=styles.filter(s=>(s.buyerId||s.buyer)===bid);
+ setOptions($('pStyle'),list.map(s=>({id:s.id,name:s.name||s.style})), 'Select Style');
+}
+function fillProductionSelectors(){
+ setOptions($('dBuyer'),buyers.map(b=>({id:b.id,name:b.name})), 'Select Buyer');
+ prodStyleOptions();
+}
+function prodStyleOptions(){
+ const bid=$('dBuyer').value;
+ const list=styles.filter(s=>(s.buyerId||s.buyer)===bid);
+ setOptions($('dStyle'),list.map(s=>({id:s.id,name:s.name||s.style})), 'Select Style');
+ prodPOOptions();
+}
+function prodPOOptions(){
+ const bid=$('dBuyer').value, sid=$('dStyle').value;
+ const list=pos.filter(p=>(getBuyerForPO(p)===bid)&&(getStyleForPO(p)===sid));
+ setOptions($('dPO'),list.map(p=>({id:p.id,name:poLabel(p)})), 'Select PO');
+ prodInfo();
+}
+function fillProductionSelectors(){
+ const keepB=$('dBuyer').value;
+ fill();
+ if(keepB&&buyers.some(b=>b.id===keepB)){
+  $('dBuyer').value=keepB;prodStyleOptions();
+ }
+}
+
+/* ========== BUYERS ========== */
+function saveBuyer(){
+ const name=$('bName').value.trim();
+ if(!name)return alert('Buyer name লিখুন');
+ if(buyers.some(b=>(b.name||'').toLowerCase()===name.toLowerCase()&&b.id!==editBuyer))
+  return alert('এই Buyer আগে থেকেই আছে');
+ if(editBuyer){
+  const b=buyers.find(x=>x.id===editBuyer);
+  if(b)b.name=name;
+ }else buyers.push({id:uid(),name});
+ saveData();resetBuyer();renderAll();
+}
+function resetBuyer(){
+ editBuyer=null;$('bName').value='';$('buyerFormTitle').textContent='➕ Add New Buyer';
+}
+function editBuyerItem(id){
+ const b=buyers.find(x=>x.id===id);if(!b)return;
+ editBuyer=id;$('bName').value=b.name||'';
+ $('buyerFormTitle').textContent='✏️ Edit Buyer';
+ go('buyer');
+}
+function delBuyer(id){
+ const b=buyers.find(x=>x.id===id);
+ if(!b)return;
+ if(pos.some(p=>getBuyerForPO(p)===id))return alert('এই Buyer-এর PO আছে। আগে সংশ্লিষ্ট PO মুছুন।');
+ if(!confirm('এই Buyer মুছে ফেলবেন?'))return;
+ buyers=buyers.filter(x=>x.id!==id);
+ styles=styles.filter(x=>(x.buyerId||x.buyer)!==id);
+ saveData();renderAll();
+}
+
+/* ========== STYLES ========== */
+function saveStyle(){
+ const buyerId=$('sBuyer').value,name=$('sName').value.trim();
+ if(!buyerId||!name)return alert('Buyer এবং Style Name দিন');
+ if(styles.some(s=>(s.buyerId||s.buyer)===buyerId&&(s.name||s.style||'').toLowerCase()===name.toLowerCase()&&s.id!==editStyle))
+  return alert('এই Style আগে থেকেই আছে');
+ if(editStyle){
+  const s=styles.find(x=>x.id===editStyle);
+  if(s){s.name=name;s.buyerId=buyerId;s.buyer=buyerName(buyerId)}
+ }else styles.push({id:uid(),buyerId,buyer:buyerName(buyerId),name});
+ saveData();resetStyle();renderAll();
+}
+function resetStyle(){
+ editStyle=null;$('sName').value='';$('sBuyer').value='';
+ $('styleFormTitle').textContent='➕ Add New Style';
+}
+function editStyleItem(id){
+ const s=styles.find(x=>x.id===id);if(!s)return;
+ editStyle=id;$('sBuyer').value=s.buyerId||s.buyer||'';
+ $('sName').value=s.name||s.style||'';
+ $('styleFormTitle').textContent='✏️ Edit Style';go('style');
+}
+function delStyle(id){
+ if(pos.some(p=>getStyleForPO(p)===id))return alert('এই Style-এর PO আছে। আগে সংশ্লিষ্ট PO মুছুন।');
+ if(!confirm('এই Style মুছে ফেলবেন?'))return;
+ styles=styles.filter(x=>x.id!==id);saveData();renderAll();
+}
+
+/* ========== PURCHASE ORDERS ========== */
+function savePO(){
+ const buyerId=$('pBuyer').value,styleId=$('pStyle').value;
+ const po=$('pNumber').value.trim(),order=num($('pOrder').value);
+ if(!buyerId||!styleId||!po||order<=0)return alert('Buyer, Style, PO এবং Order Quantity পূরণ করুন');
+ if(pos.some(p=>getBuyerForPO(p)===buyerId&&poLabel(p).toLowerCase()===po.toLowerCase()&&p.id!==editPO))
+  return alert('এই Buyer-এর এই PO Number আগে থেকেই আছে');
+ if(editPO){
+  const p=findPO(editPO);
+  if(p){p.buyerId=buyerId;p.buyer=buyerName(buyerId);p.styleId=styleId;p.style=styleName(styleId);p.po=po;p.order=order}
+ }else{
+  pos.push({id:uid(),buyerId,buyer:buyerName(buyerId),styleId,style:styleName(styleId),po,order});
+ }
+ saveData();resetPO();renderAll();
+}
+function resetPO(){
+ editPO=null;$('pBuyer').value='';poStyleOptions();$('pStyle').value='';
+ $('pNumber').value='';$('pOrder').value='';
+ $('poFormTitle').textContent='➕ Add New PO';
+}
+function editPOItem(id){
+ const p=findPO(id);if(!p)return;
+ editPO=id;$('pBuyer').value=getBuyerForPO(p);poStyleOptions();
+ $('pStyle').value=getStyleForPO(p);$('pNumber').value=poLabel(p);$('pOrder').value=orderQty(p);
+ $('poFormTitle').textContent='✏️ Edit PO';go('po');
+}
+function delPO(id){
+ if(productions.some(x=>x.poId===id))return alert('এই PO-এর Production History আছে। আগে Production entries মুছুন।');
+ if(!confirm('এই PO মুছে ফেলবেন?'))return;
+ pos=pos.filter(x=>x.id!==id);saveData();renderAll();
+}
+
+/* ========== PRODUCTION ========== */
+function updateBefore(){
+ const id=$('dPO').value,date=$('dDate').value;
+ const before=id&&date?calculated(id,date,editProd):0;
+ $('beforeQty').value=fmt(before);
+ calc();
+}
+function prodInfo(){updateBefore()}
+function calc(){
+ const before=num(($('beforeQty').value||'0').replace(/,/g,''));
+ const total=num($('totalInput').value);
+ const today=Math.max(0,total-before);
+ const po=findPO($('dPO').value);
+ const already=sumPOProduction($('dPO').value,editProd);
+ const balance=po?Math.max(0,orderQty(po)-already-today):0;
+ $('prodQty').value=fmt(today);
+ $('prodBalance').value=fmt(balance);
+}
+function saveProd(){
+ const date=$('dDate').value,poId=$('dPO').value;
+ if(!date||!poId)return alert('Date এবং PO নির্বাচন করুন');
+ const before=num(($('beforeQty').value||'0').replace(/,/g,''));
+ const total=num($('totalInput').value);
+ const qty=Math.max(0,total-before);
+ if(total<before)return alert('Total Production Before Production-এর চেয়ে কম হতে পারে না');
+ if(qty<=0)return alert('Today Production 0, সঠিক Total Production লিখুন');
+ const po=findPO(poId);
+ if(!po)return alert('PO পাওয়া যায়নি');
+ if(total>orderQty(po))return alert('Total Production Order Quantity-এর চেয়ে বেশি হচ্ছে');
+ if(editProd){
+  const p=productions.find(x=>x.id===editProd);
+  if(p){p.date=date;p.poId=poId;p.qty=qty}
+ }else productions.push({id:uid(),date,poId,qty});
+ saveData();resetProd();renderAll();
+}
+function resetProd(){
+ editProd=null;$('dDate').value=localDate();$('dBuyer').value='';
+ prodStyleOptions();$('dStyle').value='';prodPOOptions();$('dPO').value='';
+ $('beforeQty').value='0';$('totalInput').value='';$('prodQty').value='0';$('prodBalance').value='0';
+ $('prodFormTitle').textContent='⚙️ New Production Entry';
+}
+function editProdEntry(id){
+ const p=productions.find(x=>x.id===id);if(!p)return;
+ const po=findPO(p.poId);if(!po)return alert('এই Production-এর PO পাওয়া যায়নি');
+ editProd=id;
+ $('dDate').value=p.date;
+ $('dBuyer').value=getBuyerForPO(po);
+ prodStyleOptions();$('dStyle').value=getStyleForPO(po);
+ prodPOOptions();$('dPO').value=p.poId;
+ updateBefore();
+ const before=num(($('beforeQty').value||'0').replace(/,/g,''));
+ $('totalInput').value=before+num(p.qty);
+ calc();
+ $('prodFormTitle').textContent='✏️ Edit Production Entry';
+ go('production');
+}
+function delProdEntry(id){
+ if(!confirm('এই Production entry মুছে ফেলবেন?'))return;
+ productions=productions.filter(x=>x.id!==id);
+ saveData();renderAll();
+}
+
+/* ========== RENDER ========== */
+function renderBuyers(){
+ $('buyerBody').innerHTML=buyers.length?buyers.map((b,i)=>{
+ const styleCount=styles.filter(s=>(s.buyerId||s.buyer)===b.id).length;
+ const poCount=pos.filter(p=>getBuyerForPO(p)===b.id).length;
+ return `<tr><td>${i+1}</td><td><b>${escapeHTML(b.name)}</b></td><td>${styleCount}</td><td>${poCount}</td>
+ <td><div class="actions"><button class="icon-btn" onclick="editBuyerItem('${b.id}')">✎</button><button class="icon-btn del" onclick="delBuyer('${b.id}')">✕</button></div></td></tr>`;
+ }).join(''):`<tr><td colspan="5" class="empty">No buyers added yet.</td></tr>`;
+}
+function renderStyles(){
+ $('styleBody').innerHTML=styles.length?styles.map((s,i)=>{
+ const poCount=pos.filter(p=>getStyleForPO(p)===s.id).length;
+ return `<tr><td>${i+1}</td><td>${escapeHTML(buyerName(s.buyerId||s.buyer))}</td><td><b>${escapeHTML(s.name||s.style)}</b></td><td>${poCount}</td>
+ <td><div class="actions"><button class="icon-btn" onclick="editStyleItem('${s.id}')">✎</button><button class="icon-btn del" onclick="delStyle('${s.id}')">✕</button></div></td></tr>`;
+ }).join(''):`<tr><td colspan="5" class="empty">No styles added.</td></tr>`;
+}
+function renderPOs(){
+ const search=($('poSearch')?.value||'').toLowerCase();
+ const list=pos.filter(p=>(getPOBuyer(p)+' '+getPOStyle(p)+' '+poLabel(p)).toLowerCase().includes(search));
+ $('poBody').innerHTML=list.length?list.map(p=>{
+  const st=poStats(p.id);
+  return `<tr><td>${escapeHTML(getPOBuyer(p))}</td><td>${escapeHTML(getPOStyle(p))}</td><td><span class="tag">${escapeHTML(poLabel(p))}</span></td><td>${fmt(orderQty(p))}</td><td>${fmt(st.total)}</td><td>${fmt(st.balance)}</td>
+  <td><div class="actions"><button class="icon-btn" onclick="editPOItem('${p.id}')">✎</button><button class="icon-btn del" onclick="delPO('${p.id}')">✕</button></div></td></tr>`;
+ }).join(''):`<tr><td colspan="7" class="empty">No purchase orders found.</td></tr>`;
+}
+function historyRender(){
+ const q=($('histSearch')?.value||'').toLowerCase(),date=$('histDate')?.value||'';
+ const list=[...productions].sort((a,b)=>b.date.localeCompare(a.date)).filter(p=>{
+  const po=findPO(p.poId);
+  if(!po)return false;
+  const str=getPOBuyer(po)+' '+getPOStyle(po)+' '+poLabel(po);
+  return str.toLowerCase().includes(q)&&(!date||p.date===date);
+ });
+ $('historyBody').innerHTML=list.length?list.map(p=>{
+  const po=findPO(p.poId);
+  return `<tr><td>${escapeHTML(p.date)}</td><td>${escapeHTML(getPOBuyer(po))}</td><td>${escapeHTML(getPOStyle(po))}</td><td>${escapeHTML(poLabel(po))}</td><td><b>${fmt(p.qty)}</b></td>
+  <td><div class="actions"><button class="icon-btn" onclick="editProdEntry('${p.id}')">✎</button><button class="icon-btn del" onclick="delProdEntry('${p.id}')">✕</button></div></td></tr>`;
+ }).join(''):`<tr><td colspan="6" class="empty">No production history found.</td></tr>`;
+}
+function recentRender(){
+ const list=[...productions].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,7);
+ $('recentBody').innerHTML=list.length?list.map(p=>{
+  const po=findPO(p.poId);if(!po)return '';
+  return `<tr><td>${escapeHTML(p.date)}</td><td>${escapeHTML(getPOBuyer(po))}</td><td>${escapeHTML(getPOStyle(po))}</td><td>${escapeHTML(poLabel(po))}</td><td><b>${fmt(p.qty)}</b></td></tr>`;
+ }).join(''):`<tr><td colspan="5" class="empty">No production entries yet.</td></tr>`;
+}
+function renderDashboard(){
+ const totalOrder=pos.reduce((a,p)=>a+orderQty(p),0);
+ const totalProduction=productions.reduce((a,p)=>a+num(p.qty),0);
+ const todayProduction=productions.filter(p=>p.date===localDate()).reduce((a,p)=>a+num(p.qty),0);
+ const balance=pos.reduce((a,p)=>a+Math.max(0,orderQty(p)-poStats(p.id).total),0);
+ $('kBuyer').textContent=fmt(buyers.length);
+ $('kPO').textContent=fmt(pos.length);
+ $('kOrder').textContent=fmt(totalOrder);
+ $('kProduction').textContent=fmt(totalProduction);
+ $('kToday').textContent=fmt(todayProduction);
+ $('kBalance').textContent=fmt(balance);
+
+ const monthSelect=$('dashMonth'),selected=monthSelect.value||localDate().slice(0,7);
+ const months=[...new Set(productions.map(p=>p.date.slice(0,7)).filter(Boolean))];
+ if(!months.includes(localDate().slice(0,7)))months.push(localDate().slice(0,7));
+ const sorted=months.sort().reverse();
+ monthSelect.innerHTML=sorted.map(m=>`<option value="${m}">${new Date(m+'-01T12:00:00').toLocaleString('en-US',{month:'long',year:'numeric'})}</option>`).join('');
+ if(sorted.includes(selected))monthSelect.value=selected;
+ const month=monthSelect.value||localDate().slice(0,7);
+ const daily={};
+ productions.filter(p=>p.date.startsWith(month)).forEach(p=>{
+  const day=Number(p.date.slice(8,10));daily[day]=(daily[day]||0)+num(p.qty);
+ });
+ const days=Object.keys(daily).sort((a,b)=>Number(a)-Number(b));
+ const vals=days.map(d=>daily[d]),max=Math.max(1,...vals);
+ $('dashChart').innerHTML=days.length?days.map((d,i)=>`<div class="chart-bar" style="height:${Math.max(4,vals[i]/max*100)}%" title="${d} · ${fmt(vals[i])}"><span>${d}</span></div>`).join(''):`<div class="empty" style="width:100%">No data for this month</div>`;
+ recentRender();
+}
+function renderAll(){
+ fill();renderBuyers();renderStyles();renderPOs();historyRender();renderDashboard();
+}
+
+/* ========== REPORTS ========== */
+function reportData(){
+ const month=$('reportMonth').value||localDate().slice(0,7);
+ const type=$('reportType').value;
+ const list=productions.filter(p=>p.date.startsWith(month));
+ const groups={};
+ list.forEach(p=>{
+  const po=findPO(p.poId);if(!po)return;
+  let key,label;
+  if(type==='po'){key=p.poId;label=poLabel(po)}
+  else if(type==='buyer'){key=getBuyerForPO(po);label=getPOBuyer(po)}
+  else{key=getStyleForPO(po);label=getPOStyle(po)}
+  if(!groups[key])groups[key]={label,qty:0,entries:0,order:0};
+  groups[key].qty+=num(p.qty);groups[key].entries++;
+  if(type==='po')groups[key].order=orderQty(po);
+ });
+ return {month,type,groups,list};
+}
+function reportsRender(){
+ if(!$('reportMonth'))return;
+ const existing=$('reportMonth').value||localDate().slice(0,7);
+ const months=[...new Set([...productions.map(p=>p.date.slice(0,7)),localDate().slice(0,7)])].sort().reverse();
+ $('reportMonth').innerHTML=months.map(m=>`<option value="${m}">${new Date(m+'-01T12:00:00').toLocaleString('en-US',{month:'long',year:'numeric'})}</option>`).join('');
+ if(months.includes(existing))$('reportMonth').value=existing;
+ const data=reportData();
+ const rows=Object.entries(data.groups).sort((a,b)=>b[1].qty-a[1].qty);
+ const total=rows.reduce((a,b)=>a+b+b[1].qty,0);
+ $('reportSummary').innerHTML=`<div class="report-mini"><small>Total Production</small><strong>${fmt(total)}</strong></div><div class="report-mini"><small>Records</small><strong>${fmt(data.list.length)}</strong></div><div class="report-mini"><small>Report Groups</small><strong>${fmt(rows.length)}</strong></div>`;
+ let heads=data.type==='po'?'<tr><th>Buyer</th><th>Style</th><th>PO Number</th><th>Order Qty</th><th>Month Production</th><th>Balance</th></tr>':
+ data.type==='buyer'?'<tr><th>Buyer</th><th>Production Entries</th><th>Month Production</th></tr>':'<tr><th>Style</th><th>Production Entries</th><th>Month Production</th></tr>';
+ $('reportHead').innerHTML=heads;
+ $('reportBody').innerHTML=rows.length?rows.map(([key,g])=>{
+  if(data.type==='po'){
+   const po=findPO(key),balance=Math.max(0,orderQty(po)-sumPOProduction(key));
+   return `<tr><td>${escapeHTML(getPOBuyer(po))}</td><td>${escapeHTML(getPOStyle(po))}</td><td>${escapeHTML(poLabel(po))}</td><td>${fmt(g.order)}</td><td>${fmt(g.qty)}</td><td>${fmt(balance)}</td></tr>`;
+  }
+  return `<tr><td><b>${escapeHTML(g.label)}</b></td><td>${fmt(g.entries)}</td><td>${fmt(g.qty)}</td></tr>`;
+ }).join(''):`<tr><td colspan="6" class="empty">No production data for selected month.</td></tr>`;
+}
+
+/* ========== EXPORTS ========== */
+function csvDownload(filename,rows){
+ const csv=rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');
+ const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();
+ setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function csvExport(){
+ const rows=[['Date','Buyer','Style','PO','Today Production']];
+ [...productions].sort((a,b)=>b.date.localeCompare(a.date)).forEach(p=>{
+  const po=findPO(p.poId);if(po)rows.push([p.date,getPOBuyer(po),getPOStyle(po),poLabel(po),p.qty]);
+ });
+ csvDownload('AHB_PMS_Production_History.csv',rows);
+}
+function reportCSV(){
+ const d=reportData(),rows=[['Report Type','Month','Name','Entries','Production']];
+ Object.entries(d.groups).forEach(([id,g])=>rows.push([d.type,d.month,g.label,g.entries,g.qty]));
+ csvDownload('AHB_PMS_Monthly_Report.csv',rows);
+}
+
+/* ========== BACKUP ========== */
+function backup(){
+ const data={buyers,styles,pos,productions,poNumbers,backupDate:new Date().toISOString(),app:'AHB PMS'};
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+ a.download='AHB_PMS_Backup_'+localDate()+'.json';a.click();
+ setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function restore(){
+ const file=$('restoreFile').files[0];if(!file)return alert('Backup JSON ফাইল নির্বাচন করুন');
+ if(!confirm('Restore করলে বর্তমান ডেটা Replace হবে। Continue করবেন?'))return;
+ const reader=new FileReader();
+ reader.onload=()=>{
+  try{
+   const d=JSON.parse(reader.result);
+   if(!Array.isArray(d.buyers)||!Array.isArray(d.pos)||!Array.isArray(d.productions))throw new Error('Invalid backup');
+   buyers=d.buyers;pos=d.pos;productions=d.productions;styles=d.styles||[];poNumbers=d.poNumbers||[];
+   saveData();renderAll();alert('Backup সফলভাবে Restore হয়েছে');
+  }catch(e){alert('Backup ফাইল সঠিক নয়');}
+ };
+ reader.readAsText(file);
+}
+function clearData(){
+ if(!confirm('সতর্কতা! সব Buyers, Styles, POs ও Production data মুছে যাবে।'))return;
+ if(!confirm('আপনি নিশ্চিত? এই কাজ Undo করা যাবে না।'))return;
+ buyers=[];pos=[];productions=[];styles=[];poNumbers=[];
+ saveData();renderAll();resetBuyer();resetStyle();resetPO();resetProd();
+}
+
+/* ========== INIT ========== */
+$('dateNow').textContent=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+$('dDate').value=localDate();
+load();
+</script>
+</body>
+</html>

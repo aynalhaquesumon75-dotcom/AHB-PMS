@@ -1,0 +1,6 @@
+{
+  "name": "AHB PMS",
+  "description": "Garment factory production management system for buyers, styles, purchase orders, daily production, lines, reports, and backups.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
